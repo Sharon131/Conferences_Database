@@ -18,9 +18,9 @@ BEGIN
 		ALTER TABLE dbo.Conferences_Attendees
 			DROP CONSTRAINT Conferences_Attendees_Attendees;
 			
-	IF OBJECT_ID('Student_Attendees', 'F') IS NOT NULL
-		ALTER TABLE dbo.Student
-			DROP CONSTRAINT Student_Attendees;
+	IF OBJECT_ID('Students_Attendees', 'F') IS NOT NULL
+		ALTER TABLE dbo.Students
+			DROP CONSTRAINT Students_Attendees;
 
 	DROP TABLE dbo.Attendees; 
 END
