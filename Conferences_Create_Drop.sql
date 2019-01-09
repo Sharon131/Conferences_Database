@@ -1,150 +1,65 @@
 
-IF EXISTS (SELECT * FROM sys.databases WHERE name='Conferences_Database')
-	DROP DATABASE Conferences_Database;
-
-CREATE DATABASE Conferences_Database;
-GO
-
-USE Conferences_Database
 
 -- Created by Vertabelo (http://vertabelo.com)
--- Last modification date: 2018-12-31 18:08:57.55
+-- Last modification date: 2019-01-08 17:01:22.679
 
 -- tables
-
 -- Table: Attendees
-
-IF OBJECT_ID('dbo.Attendees','U') IS NOT NULL
-BEGIN
-	IF OBJECT_ID('Conferences_Attendees_Attendees', 'F') IS NOT NULL
-		ALTER TABLE dbo.Conferences_Attendees
-			DROP CONSTRAINT Conferences_Attendees_Attendees;
-			
-	IF OBJECT_ID('Attendees_Student', 'F') IS NOT NULL
-		ALTER TABLE dbo.Student
-			DROP CONSTRAINT Attendees_Student;
-
-	DROP TABLE dbo.Attendees; 
-END
-
 CREATE TABLE Attendees (
     AttendeeID int  NOT NULL,
-    First_Name varchar(50)  NULL,
-    Last_Name varchar(50)  NULL,
+    FirstName varchar(50)  NULL,
+    LastName varchar(50)  NULL,
     CustomerID int  NOT NULL,
     CONSTRAINT Attendees_pk PRIMARY KEY  (AttendeeID)
 );
 
 -- Table: Conferences
-
-IF OBJECT_ID('dbo.Conferences','U') IS NOT NULL
-BEGIN
-	IF OBJECT_ID('Conferences_Days_Conferences','F') IS NOT NULL
-		ALTER TABLE dbo.Conferences_Days
-			DROP CONSTRAINT Conferences_Days_Conferences;
-
-	DROP TABLE dbo.Conferences;
-END
-
 CREATE TABLE Conferences (
     ConferenceID int  NOT NULL,
-    Happened bit  NOT NULL,
+    TookPlace bit  NOT NULL,
     Description nvarchar(200)  NULL,
     CONSTRAINT Conferences_pk PRIMARY KEY  (ConferenceID)
 );
 
--- Table: Conferences_Attendees
-
-IF OBJECT_ID('dbo.Conferences_Attendees', 'U') IS NOT NULL
-BEGIN
-	IF OBJECT_ID('Workshops_Attendees_Conferences_Attendees','F') IS NOT NULL
-		ALTER TABLE dbo.Workshops_Attendees
-			DROP CONSTRAINT Workshops_Attendees_Conferences_Attendees;
-
-	DROP TABLE dbo.Conferences_Attendees;
-END
-
-
-CREATE TABLE Conferences_Attendees (
+-- Table: ConferencesAttendees
+CREATE TABLE ConferencesAttendees (
     ConferenceAttendeeID int  NOT NULL,
     AttendeeID int  NOT NULL,
     ConferenceReservationID int  NOT NULL,
-    CONSTRAINT Conferences_Attendees_pk PRIMARY KEY  (ConferenceAttendeeID)
+    CONSTRAINT ConferencesAttendees_pk PRIMARY KEY  (ConferenceAttendeeID)
 );
 
--- Table: Conferences_Days
-
-IF OBJECT_ID('dbo.Conferences_Days','U') IS NOT NULL
-BEGIN
-	IF OBJECT_ID('Conferences_Reservations_Conferences_Days','F') IS NOT NULL
-		ALTER TABLE dbo.Conferences_Reservations
-			DROP CONSTRAINT Conferences_Reservations_Conferences_Days;
-	
-	IF OBJECT_ID('Conferences_Days_Workshops','F') IS NOT NULL
-		ALTER TABLE dbo.Workshops
-			DROP CONSTRAINT Conferences_Days_Workshops;
-
-	DROP TABLE dbo.Conferences_Days;
-END
-
-CREATE TABLE Conferences_Days (
+-- Table: ConferencesDays
+CREATE TABLE ConferencesDays (
     ConferenceDayID int  NOT NULL,
     ConferenceID int  NOT NULL,
     Day date  NOT NULL,
-    Seats_no int  NOT NULL,
+    SeatNo int  NOT NULL,
     BasicPrice money  NOT NULL,
     PricingLevelID int  NOT NULL,
     EnrollmentStartDay date  NOT NULL,
-    CONSTRAINT Conferences_Days_pk PRIMARY KEY  (ConferenceDayID)
+    CONSTRAINT ConferencesDays_pk PRIMARY KEY  (ConferenceDayID)
 );
 
--- Table: Conferences_Reservations
-
-IF OBJECT_ID('dbo.Conferences_Reservations','U') IS NOT NULL
-	DROP TABLE dbo.Conferences_Reservations;
-
-CREATE TABLE Conferences_Reservations (
+-- Table: ConferencesReservations
+CREATE TABLE ConferencesReservations (
     ConferenceReservationID int  NOT NULL,
     OrderID int  NOT NULL,
     ConferenceDayID int  NOT NULL,
-    CONSTRAINT Conferences_Reservations_pk PRIMARY KEY  (ConferenceReservationID)
+    CONSTRAINT ConferencesReservations_pk PRIMARY KEY  (ConferenceReservationID)
 );
 
--- Table: Customer
-
-IF OBJECT_ID('dbo.Customer','U') IS NOT NULL
-BEGIN
-	IF OBJECT_ID('Orders_Customer','F') IS NOT NULL
-		ALTER TABLE Orders
-			DROP CONSTRAINT Orders_Customer;
-	
-	DROP TABLE dbo.Customer;
-END
-
-CREATE TABLE Customer (
+-- Table: Customers
+CREATE TABLE Customers (
     CustomerID int  NOT NULL,
     Name nvarchar(50)  NOT NULL,
     NIP char(10)  NULL,
     IsCompany bit  NOT NULL,
     Phone varchar(12)  NOT NULL,
-    CONSTRAINT Customer_pk PRIMARY KEY (CustomerID)
+    CONSTRAINT Customers_pk PRIMARY KEY  (CustomerID)
 );
 
 -- Table: Orders
-
-IF OBJECT_ID('dbo.Orders','U') IS NOT NULL
-BEGIN
-	IF OBJECT_ID('Workshops_Reservations_Orders','F') IS NOT NULL
-		ALTER TABLE Workshops_Reservations
-			DROP CONSTRAINT Workshops_Reservations_Orders;
-
-	IF OBJECT_ID('Conferences_Reservations_Orders','F') IS NOT NULL
-		ALTER TABLE Conferences_Reservations
-			DROP CONSTRAINT Conferences_Reservations_Orders;
-
-	DROP TABLE dbo.Orders;
-END
-
 CREATE TABLE Orders (
     OrderID int  NOT NULL,
     OrderDate date  NOT NULL,
@@ -154,10 +69,6 @@ CREATE TABLE Orders (
 );
 
 -- Table: Payments
-
-IF OBJECT_ID('dbo.Payments', 'U') IS NOT NULL
-	DROP TABLE dbo.Payments;
-
 CREATE TABLE Payments (
     PaymentID int  NOT NULL,
     PaymentDay date  NOT NULL,
@@ -165,151 +76,125 @@ CREATE TABLE Payments (
     CONSTRAINT Payments_pk PRIMARY KEY  (PaymentID)
 );
 
--- Table: Pricing_Levels
-
-IF OBJECT_ID('dbo.Pricing_Levels', 'U') IS NOT NULL
-	DROP TABLE dbo.Pricing_Levels;
-
-CREATE TABLE Pricing_Levels (
+-- Table: PricingLevels
+CREATE TABLE PricingLevels (
     PricingLevelID int  NOT NULL,
     StartDay smallint  NOT NULL,
     Discount decimal(4,3)  NOT NULL,
-    CONSTRAINT Pricing_Levels_pk PRIMARY KEY  (PricingLevelID)
+    CONSTRAINT PricingLevels_pk PRIMARY KEY  (PricingLevelID)
 );
 
--- Table: Student
-
-IF OBJECT_ID('dbo.Student', 'U') IS NOT NULL
-	DROP TABLE dbo.Student;
-
-CREATE TABLE Student (
-    Card_no int  NOT NULL,
+-- Table: Students
+CREATE TABLE Students (
+    CardNo int  NOT NULL,
     AttendeeID int  NOT NULL,
-    CONSTRAINT Student_pk PRIMARY KEY  (Card_no)
+    CONSTRAINT Students_pk PRIMARY KEY  (CardNo)
 );
 
 -- Table: Workshops
-
-IF OBJECT_ID('dbo.Workshops', 'U') IS NOT NULL
-BEGIN
-	IF OBJECT_ID('Workshops_Reservations_Workshops','F') IS NOT NULL
-		ALTER TABLE Workshops_Reservations
-			DROP CONSTRAINT Workshops_Reservations_Workshops;
-
-	DROP TABLE dbo.Workshops;
-END
-
 CREATE TABLE Workshops (
     WorkshopID int  NOT NULL,
-    Start_time time(0)  NOT NULL,
+    StartTime time(0)  NOT NULL,
     Duration time(0)  NOT NULL,
-    Seats_no int  NOT NULL,
+    SeatNo int  NOT NULL,
     ConferenceDayID int  NOT NULL,
     Price money  NOT NULL,
-    isCancelled bit  NOT NULL,
+    IsCancelled bit  NOT NULL,
     EnrollmentStartDay date  NOT NULL,
     CONSTRAINT Workshops_pk PRIMARY KEY  (WorkshopID)
 );
 
--- Table: Workshops_Attendees
-
-IF OBJECT_ID('dbo.Workshops_Attendees','U') IS NOT NULL
-	DROP TABLE dbo.Workshops_Attendees;
-
-CREATE TABLE Workshops_Attendees (
+-- Table: WorkshopsAttendees
+CREATE TABLE WorkshopsAttendees (
     WorkshopAttendeeID int  NOT NULL,
     ConferenceAttendeeID int  NOT NULL,
     WorkshopReservationID int  NOT NULL,
-    CONSTRAINT Workshops_Attendees_pk PRIMARY KEY  (WorkshopAttendeeID)
+    CONSTRAINT WorkshopsAttendees_pk PRIMARY KEY  (WorkshopAttendeeID)
 );
 
--- Table: Workshops_Reservations
-
-IF OBJECT_ID('dbo.Workshops_Reservations','U') IS NOT NULL
-	DROP TABLE dbo.Workshops_Reservations;
-
-CREATE TABLE Workshops_Reservations (
+-- Table: WorkshopsReservations
+CREATE TABLE WorkshopsReservations (
     WorkshopReservationID int  NOT NULL,
+    WorkshopID int  NOT NULL,
     OrderID int  NOT NULL,
-    WorkShopID int  NOT NULL,
-    CONSTRAINT Workshops_Reservations_pk PRIMARY KEY  (WorkshopReservationID)
+    CONSTRAINT WorkshopsReservations_pk PRIMARY KEY  (WorkshopReservationID)
 );
 
 -- foreign keys
--- Reference: Attendees_Customer (table: Attendees)
-ALTER TABLE Attendees ADD CONSTRAINT Attendees_Customer
+-- Reference: Attendees_Customers (table: Attendees)
+ALTER TABLE Attendees ADD CONSTRAINT Attendees_Customers
     FOREIGN KEY (CustomerID)
-    REFERENCES Customer (CustomerID);
+    REFERENCES Customers (CustomerID);
 
--- Reference: Attendees_Student (table: Student)
-ALTER TABLE Student ADD CONSTRAINT Attendees_Student
+-- Reference: ConferencesAttendees_Attendees (table: ConferencesAttendees)
+ALTER TABLE ConferencesAttendees ADD CONSTRAINT ConferencesAttendees_Attendees
     FOREIGN KEY (AttendeeID)
     REFERENCES Attendees (AttendeeID);
 
--- Reference: Conferences_Attendees_Attendees (table: Conferences_Attendees)
-ALTER TABLE Conferences_Attendees ADD CONSTRAINT Conferences_Attendees_Attendees
-    FOREIGN KEY (AttendeeID)
-    REFERENCES Attendees (AttendeeID);
-
--- Reference: Conferences_Attendees_Conferences_Reservations (table: Conferences_Attendees)
-ALTER TABLE Conferences_Attendees ADD CONSTRAINT Conferences_Attendees_Conferences_Reservations
+-- Reference: ConferencesAttendees_ConferencesReservations (table: ConferencesAttendees)
+ALTER TABLE ConferencesAttendees ADD CONSTRAINT ConferencesAttendees_ConferencesReservations
     FOREIGN KEY (ConferenceReservationID)
-    REFERENCES Conferences_Reservations (ConferenceReservationID);
+    REFERENCES ConferencesReservations (ConferenceReservationID);
 
--- Reference: Conferences_Days_Conferences (table: Conferences_Days)
-ALTER TABLE Conferences_Days ADD CONSTRAINT Conferences_Days_Conferences
+-- Reference: ConferencesDays_Conferences (table: ConferencesDays)
+ALTER TABLE ConferencesDays ADD CONSTRAINT ConferencesDays_Conferences
     FOREIGN KEY (ConferenceID)
     REFERENCES Conferences (ConferenceID);
 
--- Reference: Conferences_Days_Pricing_Levels (table: Conferences_Days)
-ALTER TABLE Conferences_Days ADD CONSTRAINT Conferences_Days_Pricing_Levels
+-- Reference: ConferencesDays_PricingLevels (table: ConferencesDays)
+ALTER TABLE ConferencesDays ADD CONSTRAINT ConferencesDays_PricingLevels
     FOREIGN KEY (PricingLevelID)
-    REFERENCES Pricing_Levels (PricingLevelID);
+    REFERENCES PricingLevels (PricingLevelID);
 
--- Reference: Conferences_Days_Workshops (table: Workshops)
-ALTER TABLE Workshops ADD CONSTRAINT Conferences_Days_Workshops
+-- Reference: ConferencesReservations_ConferencesDays (table: ConferencesReservations)
+ALTER TABLE ConferencesReservations ADD CONSTRAINT ConferencesReservations_ConferencesDays
     FOREIGN KEY (ConferenceDayID)
-    REFERENCES Conferences_Days (ConferenceDayID);
+    REFERENCES ConferencesDays (ConferenceDayID);
 
--- Reference: Conferences_Reservations_Conferences_Days (table: Conferences_Reservations)
-ALTER TABLE Conferences_Reservations ADD CONSTRAINT Conferences_Reservations_Conferences_Days
-    FOREIGN KEY (ConferenceDayID)
-    REFERENCES Conferences_Days (ConferenceDayID);
-
--- Reference: Conferences_Reservations_Orders (table: Conferences_Reservations)
-ALTER TABLE Conferences_Reservations ADD CONSTRAINT Conferences_Reservations_Orders
+-- Reference: ConferencesReservations_Orders (table: ConferencesReservations)
+ALTER TABLE ConferencesReservations ADD CONSTRAINT ConferencesReservations_Orders
     FOREIGN KEY (OrderID)
     REFERENCES Orders (OrderID);
 
--- Reference: Orders_Customer (table: Orders)
-ALTER TABLE Orders ADD CONSTRAINT Orders_Customer
+-- Reference: Orders_Customers (table: Orders)
+ALTER TABLE Orders ADD CONSTRAINT Orders_Customers
     FOREIGN KEY (CustomerID)
-    REFERENCES Customer (CustomerID);
+    REFERENCES Customers (CustomerID);
 
--- Reference: Payments_Orders (table: Orders)
-ALTER TABLE Orders ADD CONSTRAINT Payments_Orders
+-- Reference: Orders_Payments (table: Orders)
+ALTER TABLE Orders ADD CONSTRAINT Orders_Payments
     FOREIGN KEY (PaymentID)
     REFERENCES Payments (PaymentID);
 
--- Reference: Workshops_Attendees_Conferences_Attendees (table: Workshops_Attendees)
-ALTER TABLE Workshops_Attendees ADD CONSTRAINT Workshops_Attendees_Conferences_Attendees
+-- Reference: Students_Attendees (table: Students)
+ALTER TABLE Students ADD CONSTRAINT Students_Attendees
+    FOREIGN KEY (AttendeeID)
+    REFERENCES Attendees (AttendeeID);
+
+-- Reference: WorkshopsAttendees_ConferencesAttendees (table: WorkshopsAttendees)
+ALTER TABLE WorkshopsAttendees ADD CONSTRAINT WorkshopsAttendees_ConferencesAttendees
     FOREIGN KEY (ConferenceAttendeeID)
-    REFERENCES Conferences_Attendees (ConferenceAttendeeID);
+    REFERENCES ConferencesAttendees (ConferenceAttendeeID);
 
--- Reference: Workshops_Attendees_Workshops_Reservations (table: Workshops_Attendees)
-ALTER TABLE Workshops_Attendees ADD CONSTRAINT Workshops_Attendees_Workshops_Reservations
+-- Reference: WorkshopsAttendees_WorkshopsReservations (table: WorkshopsAttendees)
+ALTER TABLE WorkshopsAttendees ADD CONSTRAINT WorkshopsAttendees_WorkshopsReservations
     FOREIGN KEY (WorkshopReservationID)
-    REFERENCES Workshops_Reservations (WorkshopReservationID);
+    REFERENCES WorkshopsReservations (WorkshopReservationID);
 
--- Reference: Workshops_Reservations_Orders (table: Workshops_Reservations)
-ALTER TABLE Workshops_Reservations ADD CONSTRAINT Workshops_Reservations_Orders
+-- Reference: WorkshopsReservations_Orders (table: WorkshopsReservations)
+ALTER TABLE WorkshopsReservations ADD CONSTRAINT WorkshopsReservations_Orders
     FOREIGN KEY (OrderID)
     REFERENCES Orders (OrderID);
 
--- Reference: Workshops_Reservations_Workshops (table: Workshops_Reservations)
-ALTER TABLE Workshops_Reservations ADD CONSTRAINT Workshops_Reservations_Workshops
-    FOREIGN KEY (WorkShopID)
+-- Reference: WorkshopsReservations_Workshops (table: WorkshopsReservations)
+ALTER TABLE WorkshopsReservations ADD CONSTRAINT WorkshopsReservations_Workshops
+    FOREIGN KEY (WorkshopID)
     REFERENCES Workshops (WorkshopID);
+
+-- Reference: Workshops_ConferencesDays (table: Workshops)
+ALTER TABLE Workshops ADD CONSTRAINT Workshops_ConferencesDays
+    FOREIGN KEY (ConferenceDayID)
+    REFERENCES ConferencesDays (ConferenceDayID);
 
 -- End of file.
 
