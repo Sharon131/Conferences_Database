@@ -10,16 +10,15 @@ GO
 
 USE ConferencesDB
 GO
+
 -- tables
 -- Table: Attendees
 
 IF OBJECT_ID('dbo.Attendees','U') IS NOT NULL
 BEGIN
---removal of foreign key from ConferencesAttendees table
-	IF OBJECT_ID('ConferencesAttendees_Attendees', 'F') IS NOT NULL
+  IF OBJECT_ID('ConferencesAttendees_Attendees', 'F') IS NOT NULL
 		ALTER TABLE dbo.ConferencesAttendees
 			DROP CONSTRAINT ConferencesAttendees_Attendees;
---removal of foreign key from Students table
 	IF OBJECT_ID('Students_Attendees', 'F') IS NOT NULL
 		ALTER TABLE dbo.Students
 			DROP CONSTRAINT Students_Attendees;
@@ -39,7 +38,6 @@ CREATE TABLE Attendees (
 
 IF OBJECT_ID('dbo.Conferences','U') IS NOT NULL
 BEGIN
---removal of foreign key from ConferencesDays table
 	IF OBJECT_ID('ConferencesDays_Conferences','F') IS NOT NULL
 		ALTER TABLE dbo.ConferencesDays
 			DROP CONSTRAINT ConferencesDays_Conferences;
@@ -58,7 +56,6 @@ CREATE TABLE Conferences (
 
 IF OBJECT_ID('dbo.ConferencesAttendees', 'U') IS NOT NULL
 BEGIN
---removal of foreign key from WorkshopsAttendees table
 	IF OBJECT_ID('WorkshopsAttendees_ConferencesAttendees','F') IS NOT NULL
 		ALTER TABLE dbo.WorkshopsAttendees
 			DROP CONSTRAINT WorkshopsAttendees_Conferences_Attendees;
@@ -77,11 +74,9 @@ CREATE TABLE ConferencesAttendees (
 
 IF OBJECT_ID('dbo.ConferencesDays','U') IS NOT NULL
 BEGIN
---removal of foreign key from ConferencesReservations table
 	IF OBJECT_ID('ConferencesReservations_ConferencesDays','F') IS NOT NULL
 		ALTER TABLE dbo.ConferencesReservations
 			DROP CONSTRAINT ConferencesReservations_Conferences_Days;
---removal of foreign key from Workshops table
 	IF OBJECT_ID('Workshops_ConferencesDays','F') IS NOT NULL
 		ALTER TABLE dbo.Workshops
 			DROP CONSTRAINT Workshops_ConferencesDays;
@@ -116,7 +111,6 @@ CREATE TABLE ConferencesReservations (
 
 IF OBJECT_ID('dbo.Customers','U') IS NOT NULL
 BEGIN
---removal of foreign key from Orders table
 	IF OBJECT_ID('Orders_Customers','F') IS NOT NULL
 		ALTER TABLE Orders
 			DROP CONSTRAINT Orders_Customers;
@@ -137,11 +131,9 @@ CREATE TABLE Customers (
 
 IF OBJECT_ID('dbo.Orders','U') IS NOT NULL
 BEGIN
---removal of foreign key from WokrshopsReservationsOrders table
 	IF OBJECT_ID('WorkshopsReservations_Orders','F') IS NOT NULL
 		ALTER TABLE WorkshopsReservations
 			DROP CONSTRAINT WorkshopsReservations_Orders;
---removal of foreign key from ConferencesReservations table
 	IF OBJECT_ID('ConferencesReservations_Orders','F') IS NOT NULL
 		ALTER TABLE ConferencesReservations
 			DROP CONSTRAINT ConferencesReservations_Orders;
@@ -196,7 +188,6 @@ CREATE TABLE Students (
 
 IF OBJECT_ID('dbo.Workshops', 'U') IS NOT NULL
 BEGIN
---removal of foreign key from WorkshopsReservations table
 	IF OBJECT_ID('WorkshopsReservations_Workshops','F') IS NOT NULL
 		ALTER TABLE WorkshopsReservations
 			DROP CONSTRAINT WorkshopsReservations_Workshops;
