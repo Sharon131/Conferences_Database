@@ -56,7 +56,7 @@ def create_conference():
 
 
 def add_pricing_levels():
-    print('Pricing Levels')
+    # print('Pricing Levels')
     pricing_level0 = (7, 0)
     cursor.execute("INSERT INTO PricingLevels(StartDay, Discount) values(?,?);", pricing_level0)
     pricing_level1 = (14, 0.10)
@@ -75,21 +75,24 @@ def get_random_date(is_from_past):
 
 
 def add_conferences_days():
-    print('Conferences Days')
+    # print('Conferences Days')
     cursor.execute("SELECT ConferenceID, TookPlace FROM Conferences;")
     conferences = cursor.fetchall()
 
     for conference in conferences:
-        print('Generating Conference Day')
         start_date = get_random_date(conference.TookPlace)
-        enrollment_start_day = get_random_date(conference.TookPlace)
+        enrollment_start_day = get_random_date(conference.TookPlace)     # enrollment_start_day should be < start_date
         duration_in_days = random.randint(2, 3)
         for day_no in range(0, duration_in_days):
-            seats_no = random.randint(100, 300)
             date_of_day = start_date + datetime.timedelta(days=day_no)
-            print(date_of_day.strftime('%d/%m/%Y'))
-            # enrollment_day = enrollment_start_day + day
-            # cursor.execute("INSERT INTO Conferences_Days(StartDay, Discount) values(?,?);", pricing_level3)
+            seats_no = random.randint(100, 300)
+            price = random.randint(50, 100)
+            pricing_level_id = 1
+            enrollment_day = enrollment_start_day + datetime.timedelta(days=day_no)
+            conference_day = (conference.ConferenceID, date_of_day.strftime('%m-%d-%Y'), seats_no, price,
+                              pricing_level_id, enrollment_day.strftime('%m-%d-%Y'))
+            cursor.execute("INSERT INTO ConferencesDays(ConferenceID, Day, SeatNo,BasicPrice, PricingLevelID, EnrollmentStartDay) values(?,?,?,?,?,?);",
+                          conference_day)
 
 
 def add_orders():
@@ -101,20 +104,20 @@ def add_orders():
         print('Generating order for conference')
 
 print('Hi! Beginning of the generator.')
-# add_customers()
-# add_conferences()
-# add_pricing_levels()
+add_customers()
+add_conferences()
+add_pricing_levels()
 
 add_conferences_days()
 
 # add_orders()
 
-cursor.execute("SELECT * FROM PricingLevels")
+cursor.execute("SELECT * FROM ConferencesDays")
 
 rows = cursor.fetchall()
 
 for row in rows:
-    print(row.PricingLevelID, row.StartDay, row.Discount)
+    print(row.ConferenceDayID, row.ConferenceID, row.Day, row.SeatNo)
 
 cursor.execute("SELECT ConferenceID FROM Conferences")
 rows = cursor.fetchall()
