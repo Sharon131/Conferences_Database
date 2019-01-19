@@ -25,6 +25,7 @@ def test_faker():
 
 
 def add_customers():
+    # print("Customers")
     customers_no = random.randint(70, 90)
 
     for h in range(0, customers_no):
@@ -45,6 +46,7 @@ def create_customer():
 
 
 def add_conferences():
+    # print("Conferences")
     conferences_no = random.randint(60, 80)
 
     for h in range(0, conferences_no):
@@ -222,38 +224,143 @@ def add_students():
 
 
 def add_conferences_reservations():
-    print("Conferences Reservations")
+    # print("Conferences Reservations")
+
+    cursor.execute("SELECT MIN(ConferenceDayID) FROM ConferencesDays")
+    min_conference_day_id = cursor.fetchone()
+    cursor.execute("SELECT MAX(ConferenceDayID) FROM ConferencesDays")
+    max_conference_day_id = cursor.fetchone()
+
+    cursor.execute("SELECT OrderID FROM Orders")
+    orders = cursor.fetchall()
+
+    for order in orders:
+        reservations_no = random.randint(1, 5)
+
+        for h in range(0, reservations_no):
+            conference_day_id = random.randint(min_conference_day_id[0], max_conference_day_id[0])
+            conference_reservation = (order[0], conference_day_id)
+            cursor.execute("INSERT INTO ConferencesReservations(OrderID, ConferenceDayID) values(?,?);",
+                           conference_reservation)
 
 
 def add_conferences_attendees():
-    print("Conferences Attendees")
+    # print("Conferences Attendees")
+
+    cursor.execute("SELECT MIN(AttendeeID) FROM Attendees")
+    min_attendee_id = cursor.fetchone()
+    cursor.execute("SELECT MAX(AttendeeID) FROM Attendees")
+    max_attendee_id = cursor.fetchone()
+
+    cursor.execute("SELECT ConferenceReservationID FROM ConferencesReservations")
+    conferences_reservations = cursor.fetchall()
+
+    for conference_reservation in conferences_reservations:
+        attendees_in_reservation_no = random.randint(1, 10)
+
+        for h in range(0, attendees_in_reservation_no):
+            attendee_id = random.randint(min_attendee_id[0], max_attendee_id[0])
+            conference_attendee = (attendee_id, conference_reservation[0])
+            cursor.execute("INSERT INTO ConferencesAttendees(AttendeeID, ConferenceReservationID) values(?,?);",
+                           conference_attendee)
+
+    cursor.execute("SELECT MIN(ConferenceReservationID) FROM ConferencesReservations")
+    min_conferences_reservations_id = cursor.fetchone()
+    cursor.execute("SELECT MAX(ConferenceReservationID) FROM ConferencesReservations")
+    max_conferences_reservations_id = cursor.fetchone()
+
+    cursor.execute("SELECT AttendeeID FROM Attendees WHERE AttendeeID NOT IN(SELECT AttendeeID FROM ConferencesAttendees)")
+    attendees_left = cursor.fetchall()
+
+    for attendee in attendees_left:
+        conference_reservation_id = random.randint(min_conferences_reservations_id[0], max_conferences_reservations_id[0])
+        conference_attendee = (attendee[0], conference_reservation_id)
+        cursor.execute("INSERT INTO ConferencesAttendees(AttendeeID, ConferenceReservationID) values(?,?);",
+                       conference_attendee)
 
 
 def add_workshops_reservations():
-    print("Workshops_Reservations")
+    # print("Workshops_Reservations")
+
+    cursor.execute("SELECT MIN(WorkshopID) FROM Workshops")
+    min_workshop_id = cursor.fetchone()
+    cursor.execute("SELECT MAX(WorkshopID) FROM Workshops")
+    max_workshop_id = cursor.fetchone()
+
+    cursor.execute("SELECT OrderID FROM Orders")
+    orders = cursor.fetchall()
+
+    for order in orders:
+        reservations_no = random.randint(1, 4)
+
+        for h in range(0, reservations_no):
+            workshop_id = random.randint(min_workshop_id[0], max_workshop_id[0])
+            workshop_reservation = (order[0], workshop_id)
+            cursor.execute("INSERT INTO WorkshopsReservations(OrderID, WorkshopID) values(?,?);",
+                           workshop_reservation)
 
 
 def add_workshops_attendees():
-    print("Workshops Attendees")
+    # print("Workshops Attendees")
+
+    cursor.execute("SELECT MIN(ConferenceAttendeeID) FROM ConferencesAttendees")
+    min_conference_attendee_id = cursor.fetchone()
+    cursor.execute("SELECT MAX(ConferenceAttendeeID) FROM ConferencesAttendees")
+    max_conference_attendee_id = cursor.fetchone()
+
+    cursor.execute("SELECT WorkshopReservationID FROM WorkshopsReservations;")
+    workshops_reservations = cursor.fetchall()
+
+    for workshop_reservation in workshops_reservations:
+        attendees_in_reservation_no = random.randint(1, 10)
+
+        for h in range(0, attendees_in_reservation_no):
+            conference_attendee_id = random.randint(min_conference_attendee_id[0], max_conference_attendee_id[0])
+            workshop_attendee = (workshop_reservation[0], conference_attendee_id)
+            cursor.execute("INSERT INTO WorkshopsAttendees(WorkshopReservationID, ConferenceAttendeeID) values(?,?);",
+                           workshop_attendee)
 
 
-print('Hi! Beginning of the generator.')
+print('Hi! Mr Bean is ready to add new records to your database.')
 
 add_customers()
+con.commit()
+
 add_conferences()
+con.commit()
+
 add_pricing_levels()
+con.commit()
+
 add_conferences_days()
+con.commit()
+
 add_workshops()
+con.commit()
+
 add_orders()
+con.commit()
+
 add_payments()
+con.commit()
+
 add_attendees()
+con.commit()
+
 add_students()
+con.commit()
 
-# add_conferences_reservations()
-# add_conferences_attendees()
-# add_workshops_reservations()
-# add_workshops_attendees()
+add_conferences_reservations()
+con.commit()
 
+add_conferences_attendees()
+con.commit()
+
+add_workshops_reservations()
+con.commit()
+
+add_workshops_attendees()
+con.commit()
 
 con.commit()
 con.close()
