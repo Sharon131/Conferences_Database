@@ -123,7 +123,7 @@ CREATE TABLE Customers (
     Name		nvarchar(50)	NOT NULL,
     NIP			char(10)		NULL,
     IsCompany	bit				NOT NULL,
-    Phone		varchar(12)		NOT NULL,
+    Phone		varchar(16)		NOT NULL,
     CONSTRAINT Customers_pk PRIMARY KEY  (CustomerID)
 );
 
@@ -179,8 +179,8 @@ IF OBJECT_ID('dbo.Students', 'U') IS NOT NULL
 	DROP TABLE dbo.Students;
 
 CREATE TABLE Students (
-    CardNo		int   IDENTITY	NOT NULL,
-    AttendeeID	int				NOT NULL,
+    CardNo		int   UNIQUE	NOT NULL,
+    AttendeeID	int	  UNIQUE	NOT NULL,
     CONSTRAINT Students_pk PRIMARY KEY  (CardNo)
 );
 
@@ -270,7 +270,7 @@ ALTER TABLE ConferencesReservations ADD CONSTRAINT ConferencesReservations_Order
 
 --adding check constraint to NIP column of Customers table
 ALTER TABLE Customers
-ADD CONSTRAINT checkIfNIPConsistOfDigitsOnly CHECK (IsNumeric(NIP) = 1);
+ADD CONSTRAINT isNIPnumber CHECK (NIP NOT LIKE '%[^0-9]&');
 
 --adding default value constraint to IsCompany column of Customers table
 ALTER TABLE Customers
