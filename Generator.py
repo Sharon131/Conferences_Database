@@ -19,10 +19,13 @@ def test_faker():
     print("Test fakera. Fałszywa data: " + date_example.strftime('%d/%m/%Y'))
     future_date_in_date_format = fake.future_date("+30d", None)
     print("test fakera. Fałszywa przyszła data: " + future_date_in_date_format.strftime('%d/%m/%Y'))
+    print("Test fakera. Fałszywa godzina : " + fake.time("%H:%M:%S", None))
+    fake_time = fake.time_object(end_datetime=None)
+    print("Test fakera. Fałszywy czas 2 sposób: " + fake_time.strftime("%H:%M:%S"))
 
 
 def add_customers():
-    customers_no = random.randint(60, 80)
+    customers_no = random.randint(70, 90)
 
     for h in range(0, customers_no):
         customer = create_customer()
@@ -42,7 +45,7 @@ def create_customer():
 
 
 def add_conferences():
-    conferences_no = 60
+    conferences_no = random.randint(60, 80)
 
     for h in range(0, conferences_no):
         conference = create_conference()
@@ -50,9 +53,19 @@ def add_conferences():
 
 
 def create_conference():
-    took_place = random.randint(0, 1)
+    took_place = get_weighted_probability(1, 3)
     conference = (took_place, fake.text())
     return conference
+
+
+def get_weighted_probability(frequency_of_zero, frequency_of_one):
+    interval = (frequency_of_zero + frequency_of_one)*10
+    random_number = random.randint(0, interval)
+
+    if random_number < frequency_of_zero*10:
+        return 0
+    else:
+        return 1
 
 
 def add_pricing_levels():
@@ -87,43 +100,160 @@ def add_conferences_days():
             date_of_day = start_date + datetime.timedelta(days=day_no)
             seats_no = random.randint(100, 300)
             price = random.randint(50, 100)
-            pricing_level_id = 1
+            cursor.execute("SELECT PricingLevelID from PricingLevels;")
+            pricing_level = cursor.fetchone()
             enrollment_day = enrollment_start_day + datetime.timedelta(days=day_no)
             conference_day = (conference.ConferenceID, date_of_day.strftime('%m-%d-%Y'), seats_no, price,
-                              pricing_level_id, enrollment_day.strftime('%m-%d-%Y'))
+                              pricing_level[0], enrollment_day.strftime('%m-%d-%Y'))
             cursor.execute("INSERT INTO ConferencesDays(ConferenceID, Day, SeatNo,BasicPrice, PricingLevelID, EnrollmentStartDay) values(?,?,?,?,?,?);",
                           conference_day)
 
 
-def add_orders():
-    print('Orders')
-    cursor.execute("SELECT ConferenceID FROM Conferences;")
-    conferences = cursor.fetchall()
+def add_workshops():
+    # print('Workshops')
 
-    for conference_id in conferences:
-        print('Generating order for conference')
+    cursor.execute("SELECT ConferenceDayID, SeatNo FROM ConferencesDays;")
+    conferences_days = cursor.fetchall()
+
+    for conference_day in conferences_days:
+        workshops_no = random.randint(2, 3)
+        conference_seats_left = conference_day.SeatNo
+
+        for h in range(0, workshops_no):
+            start_time = fake.time(pattern='%H:%M:%S', end_datetime=None)
+            duration = fake.time(pattern='%H:%M:%S', end_datetime=None)
+
+            seats_no = get_random_seat_no(conference_seats_left)
+            conference_seats_left -= seats_no
+
+            is_workshop_for_free = get_weighted_probability(3, 2)
+            if is_workshop_for_free:
+                price = 0
+            else:
+                price = random.randint(10, 50)
+
+            is_cancelled = get_weighted_probability(4, 1)
+            enrollment_day = get_random_date(1)
+            workshop = (start_time, duration, seats_no,
+                        conference_day.ConferenceDayID, price, is_cancelled, enrollment_day.strftime('%m-%d-%Y'))
+            cursor.execute(
+                "INSERT INTO Workshops(StartTime, Duration, SeatNo, ConferenceDayID, Price, IsCancelled, EnrollmentStartDay) values (?,?,?,?,?,?,?);",
+                workshop)
+
+
+def get_random_seat_no(upper_limit):
+    if upper_limit <= 0:
+        return 0
+    else:
+        seats_no = random.randint(10, 50)
+        while seats_no >= upper_limit:
+            seats_no = random.randint(10, 50)
+        return seats_no
+
+
+def add_orders():
+    # print('Orders')
+    orders_no = 100
+
+    cursor.execute("SELECT MAX(CustomerID) from Customers")
+    max_customer_id = cursor.fetchone()
+    cursor.execute("SELECT MIN(CustomerID) from Customers")
+    min_customer_id = cursor.fetchone()
+
+    for h in range(0, orders_no):
+        order_date = get_random_date(1)
+        customer_id = random.randint(min_customer_id[0], max_customer_id[0])
+        order = (order_date.strftime('%m-%d-%Y'), customer_id)
+        cursor.execute("INSERT INTO Orders(OrderDate, CustomerID) values(?,?);", order)
+
+
+def add_payments():
+    # print('Payments')
+    cursor.execute("SELECT COUNT(OrderID) FROM Orders;")
+    orders_no = cursor.fetchone()
+
+    for h in range(0, orders_no[0]):
+        is_order_payed = get_weighted_probability(1, 4)
+
+        if is_order_payed:
+            payment_date = get_random_date(1)
+            value = random.randint(10, 500)             # should check, how much should be paid
+            payment = (payment_date.strftime('%m-%d-%Y'), value)
+            cursor.execute("INSERT INTO Payments(PaymentDay, Value) values(?,?);", payment)
+
+
+def add_attendees():
+    # print('Attendees')
+    attendees_no = random.randint(600, 800)
+
+    cursor.execute("SELECT MAX(CustomerID) from Customers")
+    max_customer_id = cursor.fetchone()
+    cursor.execute("SELECT MIN(CustomerID) from Customers")
+    min_customer_id = cursor.fetchone()
+
+    for h in range(0, attendees_no):
+        customer_id = random.randint(min_customer_id[0], max_customer_id[0])
+
+        cursor.execute("SELECT * FROM Customers WHERE CustomerID = ?;", customer_id)
+        customer = cursor.fetchone()
+        is_company = customer.IsCompany
+        has_name = get_weighted_probability(1, 5)
+
+        if is_company and has_name == 0:
+            attendee = (None, None, customer_id)
+        else:
+            attendee = (fake.first_name(), fake.last_name(), customer_id)
+        cursor.execute("INSERT INTO Attendees(FirstName, LastName, CustomerID) values(?,?,?);", attendee)
+
+
+def add_students():
+    # print('Students')
+
+    cursor.execute("SELECT AttendeeID FROM Attendees")
+    attendees = cursor.fetchall()
+
+    for attendee in attendees:
+        is_student = get_weighted_probability(4, 1)
+
+        if is_student:
+            card_no = random.randint(100000, 999999)
+            student = (card_no, attendee[0])
+            cursor.execute("INSERT INTO Students(CardNo, AttendeeID) values(?,?);", student)
+
+
+def add_conferences_reservations():
+    print("Conferences Reservations")
+
+
+def add_conferences_attendees():
+    print("Conferences Attendees")
+
+
+def add_workshops_reservations():
+    print("Workshops_Reservations")
+
+
+def add_workshops_attendees():
+    print("Workshops Attendees")
+
 
 print('Hi! Beginning of the generator.')
+
 add_customers()
 add_conferences()
 add_pricing_levels()
-
 add_conferences_days()
+add_workshops()
+add_orders()
+add_payments()
+add_attendees()
+add_students()
 
-# add_orders()
+# add_conferences_reservations()
+# add_conferences_attendees()
+# add_workshops_reservations()
+# add_workshops_attendees()
 
-cursor.execute("SELECT * FROM ConferencesDays")
-
-rows = cursor.fetchall()
-
-for row in rows:
-    print(row.ConferenceDayID, row.ConferenceID, row.Day, row.SeatNo)
-
-cursor.execute("SELECT ConferenceID FROM Conferences")
-rows = cursor.fetchall()
-
-# for row in rows:
-#    print(row[0])
 
 con.commit()
 con.close()
