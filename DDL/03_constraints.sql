@@ -70,12 +70,8 @@ ALTER TABLE Orders ADD CONSTRAINT Orders_Payments
     REFERENCES Payments (PaymentID);
 
 --adding check constraint to OrderDate column of Orders table
-ALTER TABLE Orders
+ALTER TABLE Orders 
 ADD CONSTRAINT CheckIfOrderDateIsFromPast CHECK(OrderDate <= getdate());
-
---adding unique constraint to PaymentID column of Orders table
-ALTER TABLE Orders
-ADD CONSTRAINT UniquePaymentID UNIQUE (PaymentID);
 
 --adding check constraint to PaymentDate column of Payments table
 ALTER TABLE Payments
