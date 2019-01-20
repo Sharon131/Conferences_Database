@@ -4,6 +4,10 @@ ALTER TABLE Attendees ADD CONSTRAINT Attendees_Customers
     FOREIGN KEY (CustomerID)
     REFERENCES Customers (CustomerID);
 
+--adding default constraint to TookPlace column of Conferences table
+ALTER TABLE Conferences
+ADD CONSTRAINT TookPlaceDefault DEFAULT 0 FOR TookPlace;
+
 -- Reference: ConferencesAttendees_Attendees (table: ConferencesAttendees)
 ALTER TABLE ConferencesAttendees ADD CONSTRAINT ConferencesAttendees_Attendees
     FOREIGN KEY (AttendeeID)
@@ -18,6 +22,14 @@ ALTER TABLE ConferencesAttendees ADD CONSTRAINT ConferencesAttendees_Conferences
 ALTER TABLE ConferencesDays ADD CONSTRAINT ConferencesDays_Conferences
     FOREIGN KEY (ConferenceID)
     REFERENCES Conferences (ConferenceID);
+
+--adding default constraint to BasicPrice column of ConferencesDays table
+ALTER TABLE ConferencesDays
+ADD CONSTRAINT DefaultForBasicPrice DEFAULT 0 FOR BasicPrice;
+
+--adding default constraint to EnrollmentStartDay column of ConferencesDays table
+ALTER TABLE ConferencesDays
+ADD CONSTRAINT EnrollmentStartDayCheck CHECK(EnrollmentStartDay<=DayDate);
 
 -- Reference: ConferencesDays_PricingLevels (table: ConferencesDays)
 ALTER TABLE ConferencesDays ADD CONSTRAINT ConferencesDays_PricingLevels
@@ -35,8 +47,11 @@ ALTER TABLE ConferencesReservations ADD CONSTRAINT ConferencesReservations_Order
     REFERENCES Orders (OrderID);
 
 --adding check constraint to NIP column of Customers table
-ALTER TABLE Customers 
-ADD CONSTRAINT checkIfNIPConsistOfDigitsOnly CHECK (IsNumeric(NIP) = 1 OR NIP IS NULL);
+ALTER TABLE Customers
+ADD CONSTRAINT isNipNumber CHECK (NIP NOT LIKE '%[^0-9]%');
+
+ALTER TABLE Customers
+ADD CONSTRAINT isPhoneNumber CHECK (dbo.fn_checkIsPhoneNumber(Phone) = 1);
 
 --adding default value constraint to IsCompany column of Customers table
 ALTER TABLE Customers
@@ -52,6 +67,18 @@ ALTER TABLE Orders ADD CONSTRAINT Orders_Payments
     FOREIGN KEY (PaymentID)
     REFERENCES Payments (PaymentID);
 
+--adding check constraint to OrderDate column of Orders table
+ALTER TABLE Orders 
+ADD CONSTRAINT CheckIfOrderDateIsFromPast CHECK(OrderDate <= getdate());
+
+--adding unique constraint to PaymentID column of Orders table
+ALTER TABLE Orders 
+ADD CONSTRAINT UniquePaymentID UNIQUE (PaymentID);
+
+--adding check constraint to PaymentDate column of Payments table
+ALTER TABLE Payments
+ADD CONSTRAINT CheckIfPaymentDateIsFromPast CHECK(PaymentDate <= getdate());
+
 --adding check constraint to Discount column of PricingLevels table
 ALTER TABLE PricingLevels
 ADD CONSTRAINT checkIfDiscountIsEqualOrLowerThanOne CHECK (Discount <= 1);
@@ -62,16 +89,16 @@ ALTER TABLE Students ADD CONSTRAINT Students_Attendees
     REFERENCES Attendees (AttendeeID);
 
 --adding check constraint to CardNo column of Students table
-ALTER TABLE Students
-ADD CONSTRAINT checkIfCardNoConsistOfDigitsOnly CHECK (IsNumeric(CardNo) = 1);
+--ALTER TABLE Students
+--ADD CONSTRAINT checkIfCardNoConsistOfDigitsOnly CHECK (IsNumeric(CardNo) = 1);
 
 --adding unique constraint to CardNo column of Students table
 ALTER TABLE Students
-ADD CONSTRAINT setCardNoToBeUnique UNIQUE (CardNo)
+ADD CONSTRAINT setCardNoToBeUnique UNIQUE (CardNo);
 
 --adding unique constraint to AttendeeID column of Student table
 ALTER TABLE Students
-ADD CONSTRAINT setAttendeeIDToBeUnique UNIQUE (AttendeeID)
+ADD CONSTRAINT setAttendeeIDToBeUnique UNIQUE (AttendeeID);
 
 -- Reference: WorkshopsAttendees_ConferencesAttendees (table: WorkshopsAttendees)
 ALTER TABLE WorkshopsAttendees ADD CONSTRAINT WorkshopsAttendees_ConferencesAttendees
@@ -98,3 +125,11 @@ ALTER TABLE WorkshopsReservations ADD CONSTRAINT WorkshopsReservations_Workshops
 ALTER TABLE Workshops ADD CONSTRAINT Workshops_ConferencesDays
     FOREIGN KEY (ConferenceDayID)
     REFERENCES ConferencesDays (ConferenceDayID);
+
+--adding default constraint to Duration column of Workshop table
+ALTER TABLE Workshops
+ADD CONSTRAINT DefaultForDuration DEFAULT '2:00:00' FOR Duration;
+
+--adding default constraint to Price column of Workshop table
+ALTER TABLE Workshops
+ADD CONSTRAINT DefaultForPrice DEFAULT 50 FOR Price;
