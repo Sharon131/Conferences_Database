@@ -35,7 +35,7 @@ GO
 -- Lista osobowa uczestnikow na dzien konferencji
 -- Przyklad wywolania:
 --
--- SELECT dbo.fn_getAttendeesForConferenceDay(2)
+-- SELECT * FROM dbo.fn_getAttendeesForConferenceDay(2)
 -- ORDER BY LastName ASC
 ---------------------------------------------------
 IF OBJECT_ID ('fn_getAttendeesForConferenceDay', 'IF') IS NOT NULL
@@ -61,4 +61,37 @@ RETURN
 );
 GO
 
--- TODO list osobowa uczestnikow na dany warsztat
+
+--------------------------------------------------
+-- Lista uczestnikow na dany warsztat
+-- Przyklad wywolania:
+--
+-- SELECT * FROM dbo.fn_getWorkshopAttendees(2)
+-- ORDER BY LastName ASC
+---------------------------------------------------
+IF OBJECT_ID ('fn_getWorkshopAttendees', 'IF') IS NOT NULL
+    DROP FUNCTION dbo.fn_getAttendeesForConferenceDay
+GO
+
+CREATE FUNCTION dbo.fn_getWorkshopAttendees(@workshopId INTEGER)
+RETURNS TABLE
+AS
+RETURN
+(
+       SELECT ws.WorkshopID, cd.ConferenceDayID, cat.ConferenceAttendeeID, wsa.WorkshopAttendeeID,
+        atn.FirstName, atn.LastName
+        FROM Workshops AS ws
+        JOIN ConferencesDays AS cd
+        ON cd.ConferenceDayID = ws.ConferenceDayID
+        LEFT OUTER JOIN ConferencesReservations AS cr
+        ON cr.ConferenceDayID = cd.ConferenceDayID
+        LEFT OUTER JOIN ConferencesAttendees AS cat
+        ON cat.ConferenceReservationID = cr.ConferenceReservationID
+        LEFT OUTER JOIN WorkshopsAttendees AS wsa
+        ON wsa.ConferenceAttendeeID = cat.ConferenceAttendeeID
+        LEFT OUTER JOIN Attendees AS atn
+        ON atn.AttendeeID = cat.AttendeeID
+        WHERE ws.WorkshopID = @workshopId
+        ORDER BY atn.LastName ASC
+);
+GO
