@@ -18,7 +18,7 @@ BEGIN
    END
    ELSE
    BEGIN
-   INSERT INTO Payments(PaymentID, PaymentDate, [Value])
-   SELECT PaymentID, PaymentDate, [Value] FROM inserted 
+   INSERT INTO Payments(PaymentDate, [Value])
+   SELECT PaymentDate, [Value] FROM inserted
    END
 END
