@@ -1,0 +1,4 @@
+Add a user who has only the access to the views and some of the procedures
+
+ADMIN - DML only
+VIEWER - DQL only

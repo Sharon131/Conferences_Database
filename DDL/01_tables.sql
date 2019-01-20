@@ -17,7 +17,7 @@ IF OBJECT_ID('dbo.Attendees','U') IS NOT NULL
 BEGIN
 --removal of foreign key from ConferencesAttendees table
 	IF OBJECT_ID('ConferencesAttendees_Attendees', 'F') IS NOT NULL
-		ALTER TABLE dbo.ConferencesAttendees
+		ALTER TABLE dbo.ConferencesAttendeescheckIfINIP
 			DROP CONSTRAINT ConferencesAttendees_Attendees;
 --removal of foreign key from Students table			
 	IF OBJECT_ID('Students_Attendees', 'F') IS NOT NULL
@@ -129,37 +129,9 @@ CREATE TABLE Customers (
     Name		nvarchar(50)	NOT NULL,
     NIP			char(10)		NULL,
     IsCompany	bit				NOT NULL,
-    Phone		varchar(12)		NOT NULL,
+    Phone		varchar(20)		NOT NULL,
     CONSTRAINT Customers_pk PRIMARY KEY  (CustomerID)
 );
-
-
---tests -to be romoved from this file
---tests start
-
---test start for checkIfNIPConsistOfDigitsOnly constraint in Customers table
-USE ConferencesDB
-
-DELETE FROM Customers
-WHERE CustomerID IN (
-SELECT CustomerID
-FROM Customers
-)
-
-SELECT * FROM Customers
-
-SELECT * FROM Customers
-INSERT Customers(Name, NIP, Phone, IsCompany)
-VALUES ('Jan Kowalski', '0123456789','012345678901', '1')
-GO
-
-SELECT * FROM Customers
-INSERT Customers(Name, NIP, Phone, IsCompany)
-VALUES ('Jan Kowalski', 'qwertyuiop','012345678901', '1')
-GO
---test end for checkIfNIPConsistOfDigitsOnly constraint in Customers table
-
---tests end
 
 -- Table: Orders
 
@@ -192,7 +164,7 @@ IF OBJECT_ID('dbo.Payments', 'U') IS NOT NULL
 
 CREATE TABLE Payments (
     PaymentID	int   IDENTITY	NOT NULL,
-    PaymentDay	date			NOT NULL,
+    PaymentDate	date			NOT NULL,
     Value		money			NOT NULL,
     CONSTRAINT Payments_pk PRIMARY KEY  (PaymentID)
 );
@@ -215,8 +187,8 @@ IF OBJECT_ID('dbo.Students', 'U') IS NOT NULL
 	DROP TABLE dbo.Students;
 
 CREATE TABLE Students (
-    CardNo		int   IDENTITY	NOT NULL,
-    AttendeeID	int				NOT NULL,
+    CardNo		int   UNIQUE	NOT NULL,
+    AttendeeID	int	  UNIQUE	NOT NULL,
     CONSTRAINT Students_pk PRIMARY KEY  (CardNo)
 );
 
@@ -268,113 +240,3 @@ CREATE TABLE WorkshopsReservations (
     OrderID					int			NOT NULL,
     CONSTRAINT WorkshopsReservations_pk PRIMARY KEY  (WorkshopReservationID)
 );
-
--- creation of foreign keys
--- Reference: Attendees_Customers (table: Attendees)
-ALTER TABLE Attendees ADD CONSTRAINT Attendees_Customers
-    FOREIGN KEY (CustomerID)
-    REFERENCES Customers (CustomerID);
-
--- Reference: ConferencesAttendees_Attendees (table: ConferencesAttendees)
-ALTER TABLE ConferencesAttendees ADD CONSTRAINT ConferencesAttendees_Attendees
-    FOREIGN KEY (AttendeeID)
-    REFERENCES Attendees (AttendeeID);
-
--- Reference: ConferencesAttendees_ConferencesReservations (table: ConferencesAttendees)
-ALTER TABLE ConferencesAttendees ADD CONSTRAINT ConferencesAttendees_ConferencesReservations
-    FOREIGN KEY (ConferenceReservationID)
-    REFERENCES ConferencesReservations (ConferenceReservationID);
-
--- Reference: ConferencesDays_Conferences (table: ConferencesDays)
-ALTER TABLE ConferencesDays ADD CONSTRAINT ConferencesDays_Conferences
-    FOREIGN KEY (ConferenceID)
-    REFERENCES Conferences (ConferenceID);
-
--- Reference: ConferencesDays_PricingLevels (table: ConferencesDays)
-ALTER TABLE ConferencesDays ADD CONSTRAINT ConferencesDays_PricingLevels
-    FOREIGN KEY (PricingLevelID)
-    REFERENCES PricingLevels (PricingLevelID);
-
--- Reference: ConferencesReservations_ConferencesDays (table: ConferencesReservations)
-ALTER TABLE ConferencesReservations ADD CONSTRAINT ConferencesReservations_ConferencesDays
-    FOREIGN KEY (ConferenceDayID)
-    REFERENCES ConferencesDays (ConferenceDayID);
-
--- Reference: ConferencesReservations_Orders (table: ConferencesReservations)
-ALTER TABLE ConferencesReservations ADD CONSTRAINT ConferencesReservations_Orders
-    FOREIGN KEY (OrderID)
-    REFERENCES Orders (OrderID);
-
---adding check constraint to NIP column of Customers table
-ALTER TABLE Customers 
-ADD CONSTRAINT checkIfNIPConsistOfDigitsOnly CHECK (IsNumeric(NIP) = 1);
-
---adding default value constraint to IsCompany column of Customers table
-ALTER TABLE Customers
-ADD CONSTRAINT defaultValueForIsCompany DEFAULT 1 for IsCompany; 
-
--- Reference: Orders_Customers (table: Orders)
-ALTER TABLE Orders ADD CONSTRAINT Orders_Customers
-    FOREIGN KEY (CustomerID)
-    REFERENCES Customers (CustomerID);
-
--- Reference: Orders_Payments (table: Orders)
-ALTER TABLE Orders ADD CONSTRAINT Orders_Payments
-    FOREIGN KEY (PaymentID)
-    REFERENCES Payments (PaymentID);
-
---adding check constraint to Discount column of PricingLevels table
-ALTER TABLE PricingLevels
-ADD CONSTRAINT checkIfDiscountIsEqualOrLowerThanOne CHECK (Discount <= 1);
-
--- Reference: Students_Attendees (table: Students)
-ALTER TABLE Students ADD CONSTRAINT Students_Attendees
-    FOREIGN KEY (AttendeeID)
-    REFERENCES Attendees (AttendeeID);
-
---adding check constraint to CardNo column of Students table
-ALTER TABLE Students
-ADD CONSTRAINT checkIfCardNoConsistOfDigitsOnly CHECK (IsNumeric(CardNo) = 1);
-
-USE ConferencesDB
-ALTER TABLE Students 
-DROP CONSTRAINT checkIfCardNoConsistOfDigitsOnly
-
--- Reference: WorkshopsAttendees_ConferencesAttendees (table: WorkshopsAttendees)
-ALTER TABLE WorkshopsAttendees ADD CONSTRAINT WorkshopsAttendees_ConferencesAttendees
-    FOREIGN KEY (ConferenceAttendeeID)
-    REFERENCES ConferencesAttendees (ConferenceAttendeeID);
-
-
--- Reference: WorkshopsAttendees_WorkshopsReservations (table: WorkshopsAttendees)
-ALTER TABLE WorkshopsAttendees ADD CONSTRAINT WorkshopsAttendees_WorkshopsReservations
-    FOREIGN KEY (WorkshopReservationID)
-    REFERENCES WorkshopsReservations (WorkshopReservationID);
-
--- Reference: WorkshopsReservations_Orders (table: WorkshopsReservations)
-ALTER TABLE WorkshopsReservations ADD CONSTRAINT WorkshopsReservations_Orders
-    FOREIGN KEY (OrderID)
-    REFERENCES Orders (OrderID);
-
--- Reference: WorkshopsReservations_Workshops (table: WorkshopsReservations)
-ALTER TABLE WorkshopsReservations ADD CONSTRAINT WorkshopsReservations_Workshops
-    FOREIGN KEY (WorkshopID)
-    REFERENCES Workshops (WorkshopID);
-
--- Reference: Workshops_ConferencesDays (table: Workshops)
-ALTER TABLE Workshops ADD CONSTRAINT Workshops_ConferencesDays
-    FOREIGN KEY (ConferenceDayID)
-    REFERENCES ConferencesDays (ConferenceDayID);
-
---Procedury do wprawadzania danych
---Dodanie rejestracji uczestnika (Attendee) na dany dzien konferencji
-SET ANSI_NULLS ON 
-GO 
-SET QUOTED_IDENTIFIER ON 
-GO 
---https://docs.microsoft.com/en-us/sql/t-sql/statements/set-ansi-nulls-transact-sql?view=sql-server-2017
---CREATE PROCEDURE [dbo].[ConferencesReservations]
-
-
-
--- End of file.
