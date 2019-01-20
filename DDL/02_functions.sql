@@ -47,7 +47,7 @@ RETURNS TABLE
 AS
 RETURN
 (
-   SELECT cat.ConferenceAttendeeID, atn.FirstName, atn.LastName, cf.[Description], cd.ConferenceDayID, cd.Day
+   SELECT cat.ConferenceAttendeeID, atn.FirstName, atn.LastName, cf.[Description], cd.ConferenceDayID, cd.DayDate
     FROM ConferencesDays AS cd
     LEFT OUTER JOIN Conferences AS cf
     ON cf.ConferenceID = cd.ConferenceID
@@ -92,6 +92,5 @@ RETURN
         LEFT OUTER JOIN Attendees AS atn
         ON atn.AttendeeID = cat.AttendeeID
         WHERE ws.WorkshopID = @workshopId
-        ORDER BY atn.LastName ASC
 );
 GO
