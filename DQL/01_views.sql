@@ -13,3 +13,6 @@ AS
     ON cat.ConferenceReservationID = cr.ConferenceReservationID
     GROUP BY cf.[Description], cd.ConferenceDayID, cd.Day, SeatNo
 GO
+
+-- TODO lista klientow najczesciej korzystajacych z ich uslug
+

@@ -44,7 +44,7 @@ ALTER TABLE Customers
 ADD CONSTRAINT isNipNumber CHECK (NIP NOT LIKE '%[^0-9]%');
 
 ALTER TABLE Customers
-ADD CONSTRAINT isPhoneNumber CHECK (dbo.FnCheckIsPhoneNumber(Phone) = 1);
+ADD CONSTRAINT isPhoneNumber CHECK (dbo.fn_checkIsPhoneNumber(Phone) = 1);
 
 --adding default value constraint to IsCompany column of Customers table
 ALTER TABLE Customers

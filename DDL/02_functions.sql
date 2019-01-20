@@ -1,12 +1,12 @@
 USE ConferencesDB
 GO
 
-IF OBJECT_ID ('FnCheckIsPhoneNumber', 'FN') IS NOT NULL
+IF OBJECT_ID ('fn_checkIsPhoneNumber', 'FN') IS NOT NULL
 -- deletes function
-    DROP FUNCTION dbo.FnCheckIsPhoneNumber
+    DROP FUNCTION dbo.fn_checkIsPhoneNumber
 GO
 
-CREATE OR ALTER FUNCTION FnCheckIsPhoneNumber(@phone varchar(20))
+CREATE OR ALTER FUNCTION fn_checkIsPhoneNumber(@phone varchar(20))
 RETURNS numeric
 AS
 BEGIN
@@ -28,3 +28,30 @@ BEGIN
 	RETURN 0;
 END;
 GO
+
+
+
+-- Lista osobowa uczestnikow na dzien konferencji
+IF OBJECT_ID ('fn_getAttendeesForConferenceDay', 'FN') IS NOT NULL
+    DROP FUNCTION dbo.fn_getAttendeesForConferenceDay
+GO
+
+CREATE FUNCTION dbo.fn_getAttendeesForConferenceDay (@conferenceId INTEGER)
+RETURNS TABLE
+AS
+RETURN
+(
+    SELECT cf.[Description], cd.ConferenceDayID, cd.Day, SeatNo, COUNT(cat.ConferenceAttendeeID) AS attendees_number
+    FROM ConferencesDays AS cd
+    LEFT OUTER JOIN Conferences AS cf
+    ON cf.ConferenceID = cd.ConferenceID
+    LEFT OUTER JOIN ConferencesReservations AS cr
+    ON cr.ConferenceDayID = cd.ConferenceDayID
+    LEFT OUTER JOIN ConferencesAttendees cat
+    ON cat.ConferenceReservationID = cr.ConferenceReservationID
+    WHERE cd.ConferenceID = @conferenceId
+    GROUP BY cf.[Description], cd.ConferenceDayID, cd.Day, SeatNo
+);
+GO
+
+-- TODO list osobowa uczestnikow na dany warsztat
