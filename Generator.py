@@ -34,7 +34,7 @@ def add_customers():
 
     for h in range(0, customers_no):
         customer = create_customer()
-        cursor.execute("INSERT INTO Customers(Name, NIP, IsCompany, Phone) values(?,?,?,?);", customer)
+        cursor.execute("INSERT INTO Customers(Name, Phone, IsCompany, NIP) values(?,?,?,?);", customer)
 
 
 def create_customer():
@@ -43,9 +43,9 @@ def create_customer():
 
     if is_company == 1:
         nip = '0000000000'
-        customer = (fake.company(), nip, is_company, phone)
+        customer = (fake.company(), phone, is_company, nip)
     else:
-        customer = (fake.name(), None, is_company, phone)
+        customer = (fake.name(), phone, is_company, None)
     return customer
 
 
@@ -113,7 +113,7 @@ def add_conferences_days():
             enrollment_day = enrollment_start_day + datetime.timedelta(days=day_no)
             conference_day = (conference.ConferenceID, date_of_day.strftime('%m-%d-%Y'), seats_no, price,
                               pricing_level[0], enrollment_day.strftime('%m-%d-%Y'))
-            cursor.execute("INSERT INTO ConferencesDays(ConferenceID, Day, SeatNo,BasicPrice, PricingLevelID, EnrollmentStartDay) values(?,?,?,?,?,?);",
+            cursor.execute("INSERT INTO ConferencesDays(ConferenceID, DayDate, SeatNo,BasicPrice, PricingLevelID, EnrollmentStartDay) values(?,?,?,?,?,?);",
                           conference_day)
 
 
