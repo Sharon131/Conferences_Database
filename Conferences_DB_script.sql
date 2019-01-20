@@ -17,7 +17,7 @@ IF OBJECT_ID('dbo.Attendees','U') IS NOT NULL
 BEGIN
 --removal of foreign key from ConferencesAttendees table
 	IF OBJECT_ID('ConferencesAttendees_Attendees', 'F') IS NOT NULL
-		ALTER TABLE dbo.ConferencesAttendees
+		ALTER TABLE dbo.ConferencesAttendeescheckIfINIP
 			DROP CONSTRAINT ConferencesAttendees_Attendees;
 --removal of foreign key from Students table			
 	IF OBJECT_ID('Students_Attendees', 'F') IS NOT NULL
@@ -129,7 +129,7 @@ CREATE TABLE Customers (
     Name		nvarchar(50)	NOT NULL,
     NIP			char(10)		NULL,
     IsCompany	bit				NOT NULL,
-    Phone		varchar(12)		NOT NULL,
+    Phone		varchar(20)		NOT NULL,
     CONSTRAINT Customers_pk PRIMARY KEY  (CustomerID)
 );
 
@@ -192,7 +192,7 @@ IF OBJECT_ID('dbo.Payments', 'U') IS NOT NULL
 
 CREATE TABLE Payments (
     PaymentID	int   IDENTITY	NOT NULL,
-    PaymentDay	date			NOT NULL,
+    PaymentDate	date			NOT NULL,
     Value		money			NOT NULL,
     CONSTRAINT Payments_pk PRIMARY KEY  (PaymentID)
 );
@@ -215,8 +215,8 @@ IF OBJECT_ID('dbo.Students', 'U') IS NOT NULL
 	DROP TABLE dbo.Students;
 
 CREATE TABLE Students (
-    CardNo		int   IDENTITY	NOT NULL,
-    AttendeeID	int				NOT NULL,
+    CardNo		int   UNIQUE	NOT NULL,
+    AttendeeID	int	  UNIQUE	NOT NULL,
     CONSTRAINT Students_pk PRIMARY KEY  (CardNo)
 );
 
@@ -307,7 +307,12 @@ ALTER TABLE ConferencesReservations ADD CONSTRAINT ConferencesReservations_Order
 
 --adding check constraint to NIP column of Customers table
 ALTER TABLE Customers 
-ADD CONSTRAINT checkIfNIPConsistOfDigitsOnly CHECK (IsNumeric(NIP) = 1);
+ADD CONSTRAINT checkIfNIPConsistOfDigitsOnly CHECK (IsNumeric(NIP) = 1 OR NIP IS NULL);
+
+ALTER TABLE Customers 
+DROP CONSTRAINT checkIfNIPConsistOfDigitsOnly
+
+SELECT * FROM Attendees
 
 --adding default value constraint to IsCompany column of Customers table
 ALTER TABLE Customers
@@ -336,9 +341,17 @@ ALTER TABLE Students ADD CONSTRAINT Students_Attendees
 ALTER TABLE Students
 ADD CONSTRAINT checkIfCardNoConsistOfDigitsOnly CHECK (IsNumeric(CardNo) = 1);
 
-USE ConferencesDB
-ALTER TABLE Students 
-DROP CONSTRAINT checkIfCardNoConsistOfDigitsOnly
+--adding unique constraint to CardNo column of Students table
+ALTER TABLE Students
+ADD CONSTRAINT setCardNoToBeUnique UNIQUE (CardNo)
+
+--adding unique constraint to AttendeeID column of Student table
+ALTER TABLE Students
+ADD CONSTRAINT setAttendeeIDToBeUnique UNIQUE (AttendeeID)
+
+--USE ConferencesDB
+--ALTER TABLE Students 
+--DROP CONSTRAINT checkIfCardNoConsistOfDigitsOnly
 
 -- Reference: WorkshopsAttendees_ConferencesAttendees (table: WorkshopsAttendees)
 ALTER TABLE WorkshopsAttendees ADD CONSTRAINT WorkshopsAttendees_ConferencesAttendees
@@ -375,6 +388,39 @@ GO
 --https://docs.microsoft.com/en-us/sql/t-sql/statements/set-ansi-nulls-transact-sql?view=sql-server-2017
 --CREATE PROCEDURE [dbo].[ConferencesReservations]
 
-
+--TODO
+--1. fajnie by by³o wrzuciæ w tabeli Students, ¿eby nr legitki i id uczestnika by³o unique --done
+--PaymentDate i OrderDate powinny byæ z przesz³oœci albo z teraz. Czyli nie z przysz³oœci
+--I jeszcze myœla³am, ¿e fajnie by by³o przy wstawianiu dnia konferencji mo¿na by by³o dawaæ defaultowy próg cenowy, a potem ewentualnie aktualizowaæ
+--Np podczas zap³aty
+--Albo triggera na wstawianie, ¿eby oblicza³, który powinien byæ. Tylko nie do koñca wiem, czy da³oby siê potem to automatycznie aktualizowaæ. w sensie, ¿eby po przekroczeniu odpowiedniej daty samo sprawdza³o
+--Chocia¿ w sumie, to akurat nie jest z³e. Ale np EnrollmentDate mo¿e mieæ póŸniejsz¹ datê ni¿ StartDate
+--Jeœli chodzi o dzieñ konferencji
+--A, i mog¹ byæ chore godziny rozpoczêcia warsztatu, jak 2 w nocy
 
 -- End of file.
+
+--TRIGGERS
+--check if PaymentDate is not from the future -if so, it is not inserted
+IF EXISTS (SELECT * FROM sys.triggers WHERE object_id = OBJECT_ID(N'[dbo].[tr_checkIfPaymentDateIsNotFromTheFuture_Orders_InsteadOfInsert]'))
+DROP TRIGGER [dbo].[tr_checkIfPaymentDateIsNotFromTheFuture_Orders_InsteadOfInsert]
+GO
+
+CREATE TRIGGER [dbo].[tr_checkIfPaymentDateIsNotFromTheFuture_Orders_InsteadOfInsert] 
+   ON  [dbo].[Payments] 
+   INSTEAD OF INSERT
+AS 
+BEGIN	
+   IF((SELECT PaymentDate FROM Inserted) > GETDATE())
+   BEGIN
+      RAISERROR('The payment date you tried to insert can not be from the future. Statement terminated.', 16, 1)
+      --RETURN
+   END
+   ELSE
+   BEGIN
+   INSERT INTO Payments(PaymentID, PaymentDate, [Value])
+   SELECT PaymentID, PaymentDate, [Value] FROM inserted 
+   END
+END
+
+SELECT * FROM Orders
