@@ -22,6 +22,10 @@ def test_faker():
     print("Test fakera. Fałszywa godzina : " + fake.time("%H:%M:%S", None))
     fake_time = fake.time_object(end_datetime=None)
     print("Test fakera. Fałszywy czas 2 sposób: " + fake_time.strftime("%H:%M:%S"))
+    past_date1 = fake.past_datetime("-3y", None)
+    past_date2 = fake.past_datetime("-3y", None)
+    print("Test faker. Is date1 before date2?: ", (past_date1 < past_date2))
+    print("Date1: ", past_date1, "date2: ", past_date2)
 
 
 def add_customers():
@@ -96,7 +100,9 @@ def add_conferences_days():
 
     for conference in conferences:
         start_date = get_random_date(conference.TookPlace)
-        enrollment_start_day = get_random_date(conference.TookPlace)     # enrollment_start_day should be < start_date
+        enrollment_start_day = get_random_date(conference.TookPlace)
+        while start_date < enrollment_start_day:
+            enrollment_start_day = get_random_date(conference.TookPlace)
         duration_in_days = random.randint(2, 3)
         for day_no in range(0, duration_in_days):
             date_of_day = start_date + datetime.timedelta(days=day_no)
@@ -118,7 +124,7 @@ def add_workshops():
     conferences_days = cursor.fetchall()
 
     for conference_day in conferences_days:
-        workshops_no = random.randint(2, 3)
+        workshops_no = random.randint(3, 5)
         conference_seats_left = conference_day.SeatNo
 
         for h in range(0, workshops_no):
@@ -146,6 +152,8 @@ def add_workshops():
 def get_random_seat_no(upper_limit):
     if upper_limit <= 0:
         return 0
+    elif upper_limit <= 10:
+        return upper_limit
     else:
         seats_no = random.randint(10, 50)
         while seats_no >= upper_limit:
@@ -171,17 +179,22 @@ def add_orders():
 
 def add_payments():
     # print('Payments')
-    cursor.execute("SELECT COUNT(OrderID) FROM Orders;")
-    orders_no = cursor.fetchone()
+    cursor.execute("SELECT OrderID FROM Orders ORDER BY OrderDate;")
+    orders_ids = cursor.fetchall()
 
-    for h in range(0, orders_no[0]):
+    for order_id in orders_ids:
         is_order_payed = get_weighted_probability(1, 4)
 
         if is_order_payed:
             payment_date = get_random_date(1)
             value = random.randint(10, 500)             # should check, how much should be paid
             payment = (payment_date.strftime('%m-%d-%Y'), value)
-            cursor.execute("INSERT INTO Payments(PaymentDay, Value) values(?,?);", payment)
+            cursor.execute("INSERT INTO Payments(PaymentDate, Value) values(?,?);", payment)
+
+            cursor.execute("SELECT TOP 1 PaymentID from Payments ORDER BY PaymentID DESC;")
+            payment_id = cursor.fetchone()
+
+            cursor.execute("UPDATE Orders SET PaymentID = ? WHERE OrderID = ?;", (payment_id[0], order_id[0]))
 
 
 def add_attendees():
@@ -291,7 +304,7 @@ def add_workshops_reservations():
     orders = cursor.fetchall()
 
     for order in orders:
-        reservations_no = random.randint(1, 4)
+        reservations_no = random.randint(1, 5)
 
         for h in range(0, reservations_no):
             workshop_id = random.randint(min_workshop_id[0], max_workshop_id[0])
@@ -322,6 +335,7 @@ def add_workshops_attendees():
 
 
 print('Hi! Mr Bean is ready to add new records to your database.')
+
 
 add_customers()
 con.commit()
@@ -361,6 +375,7 @@ con.commit()
 
 add_workshops_attendees()
 con.commit()
+
 
 con.commit()
 con.close()
