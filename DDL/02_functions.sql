@@ -29,14 +29,20 @@ BEGIN
 END;
 GO
 
-
-
+USE ConferencesDB
+GO
+--------------------------------------------------
 -- Lista osobowa uczestnikow na dzien konferencji
+-- Przyklad wywolania:
+--
+-- SELECT dbo.fn_getAttendeesForConferenceDay(2)
+-- ORDER BY LastName ASC
+---------------------------------------------------
 IF OBJECT_ID ('fn_getAttendeesForConferenceDay', 'FN') IS NOT NULL
     DROP FUNCTION dbo.fn_getAttendeesForConferenceDay
 GO
 
-CREATE FUNCTION dbo.fn_getAttendeesForConferenceDay (@conferenceId INTEGER)
+CREATE FUNCTION dbo.fn_getAttendeesForConferenceDay (@conferenceDayId INTEGER)
 RETURNS TABLE
 AS
 RETURN
@@ -51,8 +57,7 @@ RETURN
     ON cat.ConferenceReservationID = cr.ConferenceReservationID
     LEFT OUTER JOIN Attendees AS atn
 	ON atn.AttendeeID = cat.AttendeeID
-    WHERE cd.ConferenceID = @conferenceId
-	ORDER BY LastName ASC
+    WHERE cd.ConferenceDayID = @conferenceDayId
 );
 GO
 
