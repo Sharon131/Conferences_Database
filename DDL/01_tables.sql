@@ -92,7 +92,7 @@ END
 CREATE TABLE ConferencesDays (
     ConferenceDayID		int IDENTITY NOT NULL,
     ConferenceID		int			NOT NULL,
-    Day					date		NOT NULL,
+    DayDate					date		NOT NULL,
     SeatNo				int			NOT NULL,
     BasicPrice			money		NOT NULL,
     PricingLevelID		int			NOT NULL,
@@ -240,3 +240,4 @@ CREATE TABLE WorkshopsReservations (
     OrderID					int			NOT NULL,
     CONSTRAINT WorkshopsReservations_pk PRIMARY KEY  (WorkshopReservationID)
 );
+
