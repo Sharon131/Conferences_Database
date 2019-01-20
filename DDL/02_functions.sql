@@ -41,7 +41,7 @@ RETURNS TABLE
 AS
 RETURN
 (
-    SELECT cf.[Description], cd.ConferenceDayID, cd.Day, SeatNo, COUNT(cat.ConferenceAttendeeID) AS attendees_number
+   SELECT cat.ConferenceAttendeeID, atn.FirstName, atn.LastName, cf.[Description], cd.ConferenceDayID, cd.Day
     FROM ConferencesDays AS cd
     LEFT OUTER JOIN Conferences AS cf
     ON cf.ConferenceID = cd.ConferenceID
@@ -49,8 +49,10 @@ RETURN
     ON cr.ConferenceDayID = cd.ConferenceDayID
     LEFT OUTER JOIN ConferencesAttendees cat
     ON cat.ConferenceReservationID = cr.ConferenceReservationID
+    LEFT OUTER JOIN Attendees AS atn
+	ON atn.AttendeeID = cat.AttendeeID
     WHERE cd.ConferenceID = @conferenceId
-    GROUP BY cf.[Description], cd.ConferenceDayID, cd.Day, SeatNo
+	ORDER BY LastName ASC
 );
 GO
 
