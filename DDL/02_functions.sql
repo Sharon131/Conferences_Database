@@ -38,7 +38,7 @@ GO
 -- SELECT dbo.fn_getAttendeesForConferenceDay(2)
 -- ORDER BY LastName ASC
 ---------------------------------------------------
-IF OBJECT_ID ('fn_getAttendeesForConferenceDay', 'FN') IS NOT NULL
+IF OBJECT_ID ('fn_getAttendeesForConferenceDay', 'IF') IS NOT NULL
     DROP FUNCTION dbo.fn_getAttendeesForConferenceDay
 GO
 
