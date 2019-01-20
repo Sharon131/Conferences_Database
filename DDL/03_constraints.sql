@@ -1,3 +1,5 @@
+USE ConferencesDB
+GO
 -- creation of foreign keys
 -- Reference: Attendees_Customers (table: Attendees)
 ALTER TABLE Attendees ADD CONSTRAINT Attendees_Customers
@@ -35,8 +37,14 @@ ALTER TABLE ConferencesReservations ADD CONSTRAINT ConferencesReservations_Order
     REFERENCES Orders (OrderID);
 
 --adding check constraint to NIP column of Customers table
-ALTER TABLE Customers 
-ADD CONSTRAINT checkIfNIPConsistOfDigitsOnly CHECK (IsNumeric(NIP) = 1 OR NIP IS NULL);
+--ALTER TABLE Customers
+--ADD CONSTRAINT checkIfNipConsistOfDigitsOnly CHECK (IsNumeric(NIP) = 1 OR NIP IS NULL);
+
+ALTER TABLE Customers
+ADD CONSTRAINT isNipNumber CHECK (NIP NOT LIKE '%[^0-9]%');
+
+ALTER TABLE Customers
+ADD CONSTRAINT isPhoneNumber CHECK (dbo.FnCheckIsPhoneNumber(Phone) = 1);
 
 --adding default value constraint to IsCompany column of Customers table
 ALTER TABLE Customers
