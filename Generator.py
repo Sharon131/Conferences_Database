@@ -34,7 +34,7 @@ def add_customers():
 
     for h in range(0, customers_no):
         customer = create_customer()
-        cursor.execute("INSERT INTO Customers(Name, Phone, IsCompany, NIP) values(?,?,?,?);", customer)
+        cursor.execute("INSERT INTO Customers(Name, NIP, IsCompany, Phone) values(?,?,?,?);", customer)
 
 
 def create_customer():
@@ -43,9 +43,9 @@ def create_customer():
 
     if is_company == 1:
         nip = '0000000000'
-        customer = (fake.company(), phone, is_company, nip)
+        customer = (fake.company(), nip, is_company, phone)
     else:
-        customer = (fake.name(), phone, is_company, None)
+        customer = (fake.name(), None, is_company, phone)
     return customer
 
 
