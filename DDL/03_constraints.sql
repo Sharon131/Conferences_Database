@@ -124,10 +124,14 @@ ALTER TABLE Workshops ADD CONSTRAINT Workshops_ConferencesDays
     FOREIGN KEY (ConferenceDayID)
     REFERENCES ConferencesDays (ConferenceDayID);
 
---adding default constraint to Duration column of Workshop table
+--adding default constraint to Duration column of Workshops table
 ALTER TABLE Workshops
 ADD CONSTRAINT DefaultForDuration DEFAULT '2:00:00' FOR Duration;
 
---adding default constraint to Price column of Workshop table
+--adding default constraint to Price column of Workshops table
 ALTER TABLE Workshops
 ADD CONSTRAINT DefaultForPrice DEFAULT 50 FOR Price;
+                                                      
+--adding default constraint to IsCancelled of Workshops table   
+ALTER TABLE Workshops
+ADD CONSTRAINT DefaultForIsCancelled DEFAULT 0 FOR IsCancelled;
