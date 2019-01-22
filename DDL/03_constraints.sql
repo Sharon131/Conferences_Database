@@ -91,12 +91,12 @@ ALTER TABLE Students ADD CONSTRAINT Students_Attendees
 --ADD CONSTRAINT checkIfCardNoConsistOfDigitsOnly CHECK (IsNumeric(CardNo) = 1);
 
 --adding unique constraint to CardNo column of Students table
-ALTER TABLE Students
-ADD CONSTRAINT setCardNoToBeUnique UNIQUE (CardNo);
+--ALTER TABLE Students
+--ADD CONSTRAINT setCardNoToBeUnique UNIQUE (CardNo);
 
 --adding unique constraint to AttendeeID column of Student table
-ALTER TABLE Students
-ADD CONSTRAINT setAttendeeIDToBeUnique UNIQUE (AttendeeID);
+--ALTER TABLE Students
+--ADD CONSTRAINT setAttendeeIDToBeUnique UNIQUE (AttendeeID);
 
 -- Reference: WorkshopsAttendees_ConferencesAttendees (table: WorkshopsAttendees)
 ALTER TABLE WorkshopsAttendees ADD CONSTRAINT WorkshopsAttendees_ConferencesAttendees

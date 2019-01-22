@@ -34,5 +34,6 @@ IF EXISTS
 
 ELSE
    PRINT FORMATMESSAGE('Attendee %d added to %d', @conferenceAttendeeId, @workshopId)
+   INSERT INTO WorkshopsAttendees(WorkshopReservationID, ConferenceAttendeeID) values(@conferenceAttendeeId,@workshopId);
 END;
 GO
