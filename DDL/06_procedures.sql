@@ -37,3 +37,31 @@ ELSE
    INSERT INTO WorkshopsAttendees(WorkshopReservationID, ConferenceAttendeeID) values(@conferenceAttendeeId,@workshopId);
 END;
 GO
+
+IF OBJECT_ID ( 'dbo.proc_Add_Conference', 'P' ) IS NOT NULL
+    DROP PROCEDURE dbo.proc_Add_Conference;
+GO
+
+CREATE PROCEDURE dbo.proc_Add_Conference
+	@description nvarchar(200)
+AS
+INSERT INTO Conferences(Description) VALUES(@description);
+GO
+
+IF OBJECT_ID ( 'dbo.proc_Add_Workshop', 'P' ) IS NOT NULL
+    DROP PROCEDURE dbo.proc_Add_Workshop;
+GO
+
+CREATE PROCEDURE dbo.proc_Add_Workshop
+	@start_time				time(0),
+	@duration				time(0),
+	@seat_no				int,
+	@conference_day_id		int,
+	@price					money,
+	@enrollment_start_day	date
+AS
+BEGIN
+INSERT INTO Workshops(StartTime, Duration, SeatNo, ConferenceDayID, Price, EnrollmentStartDay)
+VALUES(@start_time, @duration, @seat_no, @conference_day_id, @price, @enrollment_start_day)
+
+END;
