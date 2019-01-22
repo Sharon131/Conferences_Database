@@ -94,3 +94,30 @@ RETURN
         WHERE ws.WorkshopID = @workshopId
 );
 GO
+
+--------------------------------------------------
+-- Liczba wolnych miejsc na dany warsztat
+-- Przyklad wywolania:
+--
+-- SELECT * FROM dbo.fn_getFreePlacesAtWorkshop(2)
+-- ORDER BY [No of free places at Workshop] DSC
+---------------------------------------------------
+IF OBJECT_ID ('fn_getFreePlacesAtWorkshop', 'IF') IS NOT NULL
+    DROP FUNCTION dbo.fn_getFreePlacesAtWorkshop
+GO
+
+CREATE FUNCTION dbo.fn_getFreePlacesAtWorkshop(@workshopId INTEGER)
+RETURNS TABLE
+AS
+RETURN
+(
+       SELECT ws.WorkshopID, ws.SeatNo as [limit of places], (ws.SeatNo - count(wa.WorkshopAttendeeID)) as [No of free places at Workshop]
+        FROM Workshops AS ws
+        LEFT JOIN WorkshopsReservations AS wr
+        ON wr.WorkshopID = ws.WorkshopID
+        LEFT JOIN WorkshopsAttendees as wa
+        ON wa.WorkshopReservationID = wr.WorkshopReservationID
+        WHERE ws.WorkshopID = @workshopId
+        GROUP BY ws.WorkshopID, ws.SeatNo
+);
+GO
