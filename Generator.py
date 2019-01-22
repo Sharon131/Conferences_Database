@@ -5,7 +5,7 @@ import datetime
 
 fake = Faker('pl_PL')
 
-con = pyodbc.connect(r'Driver={SQL Server};Server=.\SQLEXPRESS;Database=ConferencesDB;Trusted_Connection=yes;')
+con = pyodbc.connect(r'Driver={SQL Server};Server=DESKTOP-SQIQ2Q5;Database=ConferencesDB;Trusted_Connection=yes;')
 cursor = con.cursor()
 
 
@@ -330,9 +330,10 @@ def add_workshops_attendees():
         for h in range(0, attendees_in_reservation_no):
             conference_attendee_id = random.randint(min_conference_attendee_id[0], max_conference_attendee_id[0])
             workshop_attendee = (workshop_reservation[0], conference_attendee_id)
-            cursor.execute("INSERT INTO WorkshopsAttendees(WorkshopReservationID, ConferenceAttendeeID) values(?,?);",
-                           workshop_attendee)
-
+            try:
+                cursor.execute('execute proc_addAttendeeToWorkshopIfNotAssigned ?, ?', (workshop_attendee[0], workshop_attendee[1]))
+            except Exception as e:
+                print("Failed to add attendee to workshop: {}".format(e))
 
 print('Hi! Mr Bean is ready to add new records to your database.')
 

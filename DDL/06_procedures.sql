@@ -34,6 +34,7 @@ IF EXISTS
 
 ELSE
    PRINT FORMATMESSAGE('Attendee %d added to %d', @conferenceAttendeeId, @workshopId)
+   INSERT INTO WorkshopsAttendees(WorkshopReservationID, ConferenceAttendeeID) values(@conferenceAttendeeId,@workshopId);
 END;
 GO
 
@@ -58,7 +59,7 @@ CREATE PROCEDURE dbo.proc_Add_Workshop
 	@conference_day_id		int,
 	@price					money,
 	@enrollment_start_day	date
-AS 
+AS
 BEGIN
 INSERT INTO Workshops(StartTime, Duration, SeatNo, ConferenceDayID, Price, EnrollmentStartDay)
 VALUES(@start_time, @duration, @seat_no, @conference_day_id, @price, @enrollment_start_day)
