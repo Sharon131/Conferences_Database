@@ -26,7 +26,7 @@ IF EXISTS(SELECT *
   DROP VIEW [dbo].V_TopCustomers
 GO
 
-CREATE VIEW V_TopCustomers
+CREATE VIEW V_Top_10_Customers
 AS 
 	select TOP 10 CustomerID, (select count(OrderID) from Orders as ord
 	where ord.CustomerID = cus.CustomerID) as OrdersMade, 
@@ -42,9 +42,9 @@ IF EXISTS(SELECT *
   DROP VIEW [dbo].V_CustomersPayments
 GO
 
-create view V_CustomersPayments
+create view V_Customers_Payments
 as 
-select Customers.CustomerID, Name, OrderID, Payments.PaymentID, PaymentDate, Value
+select Customers.CustomerID, Name, Phone, OrderID, Payments.PaymentID, PaymentDate, Value
  from Customers
 inner join Orders
 on Orders.CustomerID = Customers.CustomerID
