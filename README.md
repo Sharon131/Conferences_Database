@@ -6,10 +6,12 @@ Final project from Databases Systems on Computer Science faculty. It is a databa
 It also contains simple generator of fake data that real working company would have.
 
 ## Status
-Project is currently developed.
+Project is currently not developed.
+
+## Licence
+Feel free to use.
 
 ## Authors
 Project was developed by:      
 - Piotr Kasprzyk, [Profile](https://github.com/kaspiotr)    
 - Magdalena Pastuła, [Profile](https://github.com/Sharon131)     
-
